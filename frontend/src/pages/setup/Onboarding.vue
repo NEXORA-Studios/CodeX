@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { computed, onMounted, ref, watch, defineAsyncComponent, type Component, type ComponentPublicInstance } from "vue";
+    import { computed, onMounted, ref, watch } from "vue";
     import { useRouter } from "vue-router";
     // Animations
     import GWaveText from "@/animation/GWaveText.vue";
@@ -8,7 +8,8 @@
     import { useConfigStore, useProfileStore } from "@/modules/stores";
     import { SetConfig } from "@/modules/wailsjs/go/bind/ConfigBind";
     import { UpsertProfile } from "@/modules/wailsjs/go/bind/ProfileBind";
-    import type { IConfig, IProfile } from "@/types";
+    import { dIdeLogo } from "@/modules/Static";
+    import type { IConfig, IProfile, WaveTextInstance } from "@/types";
 
     const router = useRouter();
     const configStore = useConfigStore();
@@ -23,22 +24,21 @@
     }
 
     const lines: Line[] = [
-        { content: "欢迎来到 Code.X", class: "text-4xl absolute top-8 left-8", speed: 0.15 },
-        { content: "Code.X 不做假教学，也不构造封闭环境", class: "text-xl absolute top-24 left-8", speed: 0.075 },
-        { content: "它用清晰的引导、自动化的项目搭建", class: "text-xl absolute top-30 left-8", speed: 0.075 },
-        { content: "配合无缝集成的 IDE，带你进入真实的编程世界", class: "text-xl absolute top-36 left-8", speed: 0.075 },
-        { content: "在这里，每一段学习过程，都是通向独立作品的构建旅程", class: "text-xl absolute top-42 left-8", speed: 0.075 },
+        { content: "欢迎来到 Code X", class: "text-4xl absolute top-8 left-8", speed: 0.75 },
+        { content: "Code X 不做假教学，也不构造封闭环境", class: "text-xl absolute top-24 left-8", speed: 1 },
+        { content: "它用清晰的引导、自动化的项目搭建", class: "text-xl absolute top-30 left-8", speed: 1 },
+        { content: "配合无缝集成的 IDE，带你进入真实的编程世界", class: "text-xl absolute top-36 left-8", speed: 1 },
+        { content: "在这里，每一段学习过程，都是通向独立作品的构建旅程", class: "text-xl absolute top-42 left-8", speed: 1 },
         {
             content: "通过简单的步骤，你可以探索无限的可能！",
             class: "text-xl absolute top-58 left-8",
-            speed: 0.075,
+            speed: 1,
             next: () => {
                 stepIndex.value = 1;
             },
         },
     ];
 
-    type WaveTextInstance = ComponentPublicInstance<{ startTyping: () => void }>;
     const refs = ref<(WaveTextInstance | null)[]>([]);
 
     function handleDone(index: number, line: Line) {
@@ -52,11 +52,6 @@
 
     // 步骤相关
     const stepIndex = ref(0);
-    const dIdeLogo: { [key: string]: Component } = {
-        "Visual Studio Code": defineAsyncComponent(() => import("@/icons/VisualStudioCode.vue")),
-        Trae: defineAsyncComponent(() => import("@/icons/Trae.vue")),
-        "Trae CN": defineAsyncComponent(() => import("@/icons/Trae.vue")),
-    };
     const mSelectedIDE = ref("");
     const mIdeName = ref("");
     const mIdeTarget = ref("");
@@ -153,21 +148,21 @@
             <GWaveText
                 v-for="(line, i) in lines"
                 :key="i"
-                :ref="(el: TypeWriterInstance) => refs[i] = el"
+                :ref="(el: WaveTextInstance) => refs[i] = el"
                 :content="line.content"
                 :class="line.class"
                 :speed="line.speed"
                 @done="() => handleDone(i, line)" />
             <VSlideIn
                 direction="left"
-                :duration="0.5"
-                :delay="1"
+                :duration="0.75"
+                :delay="stepIndex === 1 ? 0.75 : 0"
                 extra-class="absolute bottom-8 left-8"
                 v-if="0 < stepIndex && stepIndex < 3 && ((stepIndex === 1 && configStore.getAvailableIDE.length !== 0) || (stepIndex === 2 && configStore.getWorkspace !== ''))">
                 <button class="btn btn-primary" @click="stepIndex += 1">下一步</button>
             </VSlideIn>
         </section>
-        <VSlideIn direction="top" :duration="0.5" v-if="stepIndex > 0" class="w-[calc(100%-calc(var(--spacing)*144))] h-full">
+        <VSlideIn direction="top" :duration="0.75" v-if="stepIndex > 0" class="w-[calc(100%-calc(var(--spacing)*144))] h-full">
             <section class="relative pt-9 flex flex-col gap-8 items-center h-full">
                 <ul class="steps w-full">
                     <li class="step step-primary" :class="{ 'step-primary': stepIndex > 0 }">添加 IDE</li>
@@ -175,15 +170,38 @@
                     <li class="step" :class="{ 'step-primary': stepIndex > 2 }">设置用户</li>
                 </ul>
                 <!-- Step 1 -->
-                <VSlideIn direction="top" :duration="0.5" class="w-full" v-if="stepIndex === 1">
+                <VSlideIn direction="top" :duration="1" class="w-full" v-if="stepIndex === 1">
                     <div class="w-full">
                         <fieldset class="fieldset bg-base-200 rounded-box w-full border border-base-content/10 p-4">
                             <legend class="fieldset-legend">目前已配置</legend>
                             <span class="text-center opacity-50" v-if="configStore.getAvailableIDE.length === 0">无</span>
-                            <div v-for="ide in configStore.getAvailableIDE" class="flex items-center gap-4">
-                                <component :is="dIdeLogo[ide.Name]" class="size-6" />
-                                <span class="badge badge-primary badge-outline">{{ ide.Name }} </span>
-                                <span>启动参数：{{ ide.LaunchTarget }}</span>
+                            <div class="overflow-x-auto" v-else>
+                                <table class="table">
+                                    <!-- head -->
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>名称</th>
+                                            <th>实例 ID</th>
+                                            <th>目标启动命令</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- row 1 -->
+                                        <tr v-for="ide of configStore.getAvailableIDE" :key="ide.GUID">
+                                            <th>
+                                                <component :is="dIdeLogo[ide.Name]" class="size-6" />
+                                            </th>
+                                            <td>{{ ide.Name }}</td>
+                                            <td>
+                                                {{ ide.GUID.split("-")[0] }}
+                                            </td>
+                                            <td>
+                                                {{ ide.LaunchTarget }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </fieldset>
 
@@ -191,7 +209,7 @@
                             <legend class="fieldset-legend">增加新 IDE</legend>
 
                             <fieldset class="fieldset -mt-4 w-full">
-                                <label class="label">IDE 类型 <span class="-ml-0.5 text-error">*</span></label>
+                                <label class="label">IDE 类型 <span class="-ml-1 text-error">*</span></label>
                                 <select class="select w-full" v-model="mSelectedIDE">
                                     <option disabled selected value="">选择一种 IDE</option>
                                     <option value="Visual Studio Code">Visual Studio Code</option>
@@ -205,12 +223,12 @@
                             </fieldset>
 
                             <fieldset class="fieldset w-full" v-if="mSelectedIDE === 'custom'">
-                                <label class="label">自定义 IDE 名称 <span class="mr-auto -ml-0.5 text-error">*</span></label>
+                                <label class="label">自定义 IDE 名称 <span class="mr-auto -ml-1 text-error">*</span></label>
                                 <input type="text" class="input w-full" placeholder="例如 Visual Studio Code" v-model="mIdeName" />
                             </fieldset>
 
                             <fieldset class="fieldset w-full" v-if="mSelectedIDE !== ''">
-                                <label class="label">应用程序启动路径 / 命令 / URL Scheme <span class="-ml-0.5 text-error">*</span></label>
+                                <label class="label">应用程序启动路径 / 命令 / URL Scheme <span class="-ml-1 text-error">*</span></label>
                                 <input type="text" class="input w-full" placeholder='例如 "C:\Program Files\Microsoft VS Code\Code.exe %s"' v-model="mIdeTarget" />
                                 <label class="label">使用 %s 占位符表示要打开的文件路径，不需要使用引号包裹</label>
                                 <label class="label -mt-2">我们建议优先通过命令行启动，例如使用 "code" "trae" 等命令</label>
@@ -222,12 +240,12 @@
                     </div>
                 </VSlideIn>
                 <!-- Step 2 -->
-                <VSlideIn direction="top" :duration="0.5" class="w-full" v-if="stepIndex === 2">
+                <VSlideIn direction="top" :duration="1" class="w-full" v-if="stepIndex === 2">
                     <div class="w-full">
                         <fieldset class="fieldset bg-base-200 rounded-box w-full border border-base-content/10 p-4">
                             <legend class="fieldset-legend">设置工作区</legend>
 
-                            <label class="label">工作区路径 <span class="-ml-0.5 text-error">*</span></label>
+                            <label class="label">工作区路径 <span class="-ml-1 text-error">*</span></label>
                             <input type="text" class="input w-full" placeholder="例如 D:\projects\" v-model="mWorkspace" />
                             <label class="label">提供你希望以后用来存放课程文件的地方，需要是绝对路径，末尾不得有 "/" 或 "\"</label>
 
@@ -236,7 +254,7 @@
                     </div>
                 </VSlideIn>
                 <!-- Step 3 -->
-                <VSlideIn direction="top" :duration="0.5" class="w-full" v-if="stepIndex === 3">
+                <VSlideIn direction="top" :duration="1" class="w-full" v-if="stepIndex === 3">
                     <div class="w-full">
                         <fieldset class="fieldset bg-base-200 rounded-box w-full border border-base-content/10 p-4">
                             <legend class="fieldset-legend">目前已有账户</legend>
@@ -259,7 +277,7 @@
                                             <td>{{ profile.Name }}</td>
                                             <td>
                                                 {{ configStore.AvailableIDE.find((i) => i.GUID === profile.IDE)?.Name }} (实例
-                                                {{ configStore.AvailableIDE.find((i) => i.GUID === profile.IDE)?.GUID.split("-")[0] }})
+                                                {{ configStore.AvailableIDE.find((i) => i.GUID === profile.IDE)?.GUID.split("-")[0] ?? "Unknown" }})
                                             </td>
                                             <td>
                                                 <button class="btn" @click="handleLogin(profile.GUID)">登录</button>
@@ -274,12 +292,12 @@
                             <legend class="fieldset-legend">增加新账户</legend>
 
                             <fieldset class="fieldset -mt-4 w-full">
-                                <label class="label">用户名 <span class="mr-auto -ml-0.5 text-error">*</span></label>
+                                <label class="label">用户名 <span class="mr-auto -ml-1 text-error">*</span></label>
                                 <input type="text" class="input w-full" placeholder="例如 MoYuan-CN" v-model="mProfileName" />
                             </fieldset>
 
                             <fieldset class="fieldset w-full">
-                                <label class="label">使用的 IDE <span class="-ml-0.5 text-error">*</span></label>
+                                <label class="label">使用的 IDE <span class="-ml-1 text-error">*</span></label>
                                 <select class="select w-full" v-model="mProfileIDE">
                                     <option disabled selected value="">选择一种 IDE</option>
                                     <option v-for="ide in configStore.getAvailableIDE" :value="ide.GUID">{{ ide.Name }} (实例 {{ ide.GUID.split("-")[0] }})</option>
@@ -288,13 +306,13 @@
 
                             <div class="grid grid-cols-2 gap-x-2">
                                 <fieldset class="fieldset w-full">
-                                    <label class="label">语言 <span class="-ml-0.5 text-error">*</span></label>
+                                    <label class="label">语言 <span class="-ml-1 text-error">*</span></label>
                                     <select class="select w-full" v-model="mProfileLang">
                                         <option disabled selected value="zh_CN">简体中文</option>
                                     </select>
                                 </fieldset>
                                 <fieldset class="fieldset w-full">
-                                    <label class="label">主题 <span class="-ml-0.5 text-error">*</span></label>
+                                    <label class="label">主题 <span class="-ml-1 text-error">*</span></label>
                                     <select class="select w-full" v-model="mProfileTheme">
                                         <option disabled selected value="codexdark">CodeX Dark</option>
                                     </select>

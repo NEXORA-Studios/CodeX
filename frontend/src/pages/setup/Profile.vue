@@ -34,6 +34,7 @@
                         <tr>
                             <th></th>
                             <th>用户名</th>
+                            <th>用户 GUID</th>
                             <th>IDE</th>
                             <th>操作</th>
                         </tr>
@@ -43,6 +44,7 @@
                         <tr v-for="[index, profile] of Object.entries(profileStore.getAllProfiles)" :key="profile.GUID">
                             <th>{{ Number(index) + 1 }}</th>
                             <td>{{ profile.Name }}</td>
+                            <td>{{ profile.GUID }}</td>
                             <td>
                                 {{ configStore.AvailableIDE.find((i) => i.GUID === profile.IDE)?.Name }} (实例
                                 {{ configStore.AvailableIDE.find((i) => i.GUID === profile.IDE)?.GUID.split("-")[0] }})

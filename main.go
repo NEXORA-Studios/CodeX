@@ -43,6 +43,7 @@ func main() {
 			&bind.ProfileBind{},
 			&bind.ConfigBind{},
 			&bind.SystemBind{},
+			&bind.EnvBind{},
 		},
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId: "00c00d10-8e8c-4522-b425-abc00369c076",

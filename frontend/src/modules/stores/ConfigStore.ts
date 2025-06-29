@@ -11,6 +11,7 @@ export const useConfigStore = defineStore("config", {
         AvailableIDE: [],
         Workspace: "",
     }),
+    
     getters: {
         getAll: (state) => ({
             AvailableIDE: state.AvailableIDE,
@@ -19,9 +20,13 @@ export const useConfigStore = defineStore("config", {
         getAvailableIDE: (state) => state.AvailableIDE,
         getWorkspace: (state) => state.Workspace,
     },
+    
     actions: {
         addNewIde(ide: IConfigStoreState["AvailableIDE"][0]) {
             this.AvailableIDE.push(ide);
+        },
+        removeIde(guid: string) {
+            this.AvailableIDE = this.AvailableIDE.filter((ide) => ide.GUID !== guid);
         },
         setWorkspace(workspace: IConfigStoreState["Workspace"]) {
             this.Workspace = workspace;
@@ -31,4 +36,6 @@ export const useConfigStore = defineStore("config", {
             this.Workspace = config.Workspace;
         },
     },
+
+    persist: true,
 });

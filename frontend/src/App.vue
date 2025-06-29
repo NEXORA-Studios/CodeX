@@ -6,7 +6,7 @@
 
 <template>
     <DecorationBar />
-    <div id="innerframe" class="p-8 w-screen h-screen bg-base-200">
+    <div id="innerframe" class="p-8 w-screen h-screen bg-base-200 overflow-hidden">
         <Navigator />
         <RouterView v-slot="{ Component }">
             <VFade>

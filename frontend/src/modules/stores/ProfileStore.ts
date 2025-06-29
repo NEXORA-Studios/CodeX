@@ -37,4 +37,6 @@ export const useProfileStore = defineStore("profile", {
             this.current_profile = guid;
         },
     },
+    
+    persist: true,
 });
