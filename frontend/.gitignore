@@ -1,0 +1,5 @@
+# Wails JS 自动生成脚本
+src/modules/wailsjs
+
+# Wails JS 构建中间文件
+package.json.md5

@@ -1,0 +1,14 @@
+{
+    "$schema": "https://wails.io/schemas/config.v2.json",
+    "name": "CodeX",
+    "outputfilename": "CodeX",
+    "frontend:install": "pnpm i",
+    "frontend:build": "pnpm build",
+    "frontend:dev:watcher": "pnpm dev",
+    "frontend:dev:serverUrl": "auto",
+    "wailsjsdir": "./frontend/src/modules",
+    "author": {
+        "name": "Jim-Lin-4549",
+        "email": "jim.lin.4549@outlook.com"
+    }
+}
