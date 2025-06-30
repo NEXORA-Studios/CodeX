@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { onMounted, ref } from "vue";
+    import { computed, onMounted, ref } from "vue";
     import CUndeline from "@/animation/CUndeline.vue";
     import GWaveText from "@/animation/GWaveText.vue";
     import VSlideIn from "@/animation/VSlideIn.vue";
@@ -75,6 +75,13 @@
             getEnvs();
         }, 1500);
     });
+
+    // 转为 entries 数组
+    const entries = computed(() => Object.entries(devenv.value));
+    const mid = computed(() => Math.floor(entries.value.length / 2));
+    const diff = computed(() => Math.ceil(entries.value.length % 2));
+    const devenv1 = computed(() => Object.fromEntries(entries.value.slice(0, mid.value + diff.value)));
+    const devenv2 = computed(() => Object.fromEntries(entries.value.slice(1 + mid.value)));
 </script>
 
 <template>
@@ -85,18 +92,48 @@
             </CUndeline>
             <GWaveText class="text-xl ml-4" content="检查开发环境" :speed="0.3" ref="t2" @done="onDone2()" />
         </section>
-        <VSlideIn direction="top" :duration="0.75" :delay="0.6 - 0.5">
-            <div class="overflow-x-auto overflow-y-hidden mt-8 w-3/5 mx-auto">
+        <div class="overflow-hidden mt-8 w-4/5 mx-auto grid grid-cols-2">
+            <VSlideIn direction="left" :duration="0.75" :delay="0.4">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th>开发环境</th>
-                            <th class="w-100">版本</th>
+                            <th class="w-6"></th>
+                            <th class="w-32">开发环境</th>
+                            <th class="w-72">版本</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(value, key) in devenv" :key="key">
+                        <tr v-for="(value, key) in devenv1" :key="key" class="h-12 group">
+                            <td>
+                                <component :is="dEnvLogo[key]" class="size-6" />
+                            </td>
+                            <td>
+                                <!-- @vue-ignore -->
+                                <GWaveText class="-mr-16" :ref="(el: WaveTextInstance) => refs[Object.keys(devenv).indexOf(<string>key)] = el" :content="key" :speed="0.5" />
+                            </td>
+                            <td>
+                                <!-- @vue-ignore -->
+                                <GWaveText
+                                    class="-mr-16"
+                                    :ref="(el: WaveTextInstance) => refs2[Object.keys(devenv).indexOf(<string>key)] = el"
+                                    :content="value.length === 0 ? '获取中...' : value === 'error' ? '未安装 / 读取版本时发生错误' : value"
+                                    :speed="0.5" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </VSlideIn>
+            <VSlideIn direction="right" :duration="0.75" :delay="0.4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="w-6"></th>
+                            <th class="w-32">开发环境</th>
+                            <th class="w-72">版本</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, key) in devenv2" :key="key" class="h-12">
                             <td>
                                 <component :is="dEnvLogo[key]" class="size-6" />
                             </td>
@@ -113,9 +150,10 @@
                                     :speed="0.5" />
                             </td>
                         </tr>
+                        <tr v-if="diff === 1"></tr>
                     </tbody>
                 </table>
-            </div>
-        </VSlideIn>
+            </VSlideIn>
+        </div>
     </main>
 </template>

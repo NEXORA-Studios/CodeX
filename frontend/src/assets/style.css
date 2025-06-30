@@ -21,10 +21,15 @@ img {
     pointer-events: none;
 }
 
+::-webkit-scrollbar {
+    display: none;
+}
+
 @import "tailwindcss";
 @plugin "@iconify/tailwind4";
 @plugin "daisyui" {
     theme: false;
+    exclude: scrollbar;
 }
 
 @plugin "daisyui/theme" {
